@@ -62,7 +62,7 @@ const publishImagesToTwitter = async () => {
 
       // Publica el fotograma en Twitter solo si el número es mayor o igual a 470
       const frameNumber = parseInt(frameFilename.split('_')[1]);
-      if (frameNumber >= 470) {
+      if (frameNumber >= 472) {
         await publishFrame(frameFilename, imageFiles.length, i + 1);
       }
     }
