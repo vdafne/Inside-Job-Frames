@@ -21,7 +21,7 @@ jobs:
         run: npm install
 
       - name: Publicar fotograma
-        run: node publish_frame.js
+        run: node publicar frame.js
         env:
           GOOGLE_DRIVE_FOLDER_ID: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}
           TWITTER_API_KEY: ${{ secrets.TWITTER_API_KEY }}
