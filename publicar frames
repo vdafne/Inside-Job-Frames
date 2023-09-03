@@ -1,0 +1,52 @@
+const fs = require('fs');
+const path = require('path');
+const { execSync } = require('child_process');
+const Twit = require('twit');
+
+const GOOGLE_DRIVE_FOLDER_ID = "11ktmiSCHqyXb-D513XM388i5018htI8s"; // Reemplaza con el ID de tu carpeta de Google Drive
+const TWITTER_API_KEY = "LHMx9g1eShUc6zD26qYswpEVq"; // Reemplaza con tu API Key
+const TWITTER_API_SECRET_KEY = "sjpLbO1KoFSRkoGCNRVYP0sBiInocbdKBEu3xfZKHGa6LEkfte"; // Reemplaza con tu API Secret Key
+const TWITTER_ACCESS_TOKEN = "1672785265264402433-CJ1pbnvPSPcwkjVzaCXvr1qQz1JDRv"; // Reemplaza con tu Access Token
+const TWITTER_ACCESS_TOKEN_SECRET = "dKvJIDSLRybSbeifBEyp8z5iHds2yNSt4LYFPaRkHrRyp"; // Reemplaza con tu Access Token Secret
+
+
+const T = new Twit({
+  consumer_key: TWITTER_API_KEY,
+  consumer_secret: TWITTER_API_SECRET_KEY,
+  access_token: TWITTER_ACCESS_TOKEN,
+  access_token_secret: TWITTER_ACCESS_TOKEN_SECRET
+});
+
+// Función para obtener la lista de fotogramas en Google Drive
+function getFrameList() {
+  const frameList = execSync(`gdrive list --query "'${GOOGLE_DRIVE_FOLDER_ID}' in parents"`).toString();
+  return frameList.split('\n').filter(item => item.includes('frame_')).map(item => item.trim());
+}
+
+// Función para publicar un fotograma en Twitter
+async function publishFrame(frameFilename, totalFrames) {
+  const frameNumber = parseInt(frameFilename.split('_')[1]);
+  const tweetText = `#insidejob Part 01 - Episode 01 frame_${frameNumber} of ${totalFrames}`;
+
+  // Publicar el tweet
+  const mediaResponse = await T.postMediaChunked({ file_path: frameFilename });
+  const mediaId = mediaResponse.data.media_id_string;
+
+  T.post('statuses/update', { status: tweetText, media_ids: [mediaId] }, function (err, data) {
+    if (err) {
+      console.log('Error al publicar el tweet:', err);
+    } else {
+      console.log('Tweet publicado:', data.text);
+    }
+  });
+}
+
+// Obtener la lista de fotogramas
+const frameList = getFrameList();
+const totalFrames = frameList.length;
+
+// Publicar fotogramas en orden a partir del fotograma 470
+for (let i = 470; i < totalFrames; i++) {
+  const frameFilename = frameList[i];
+  publishFrame(frameFilename, totalFrames);
+}
